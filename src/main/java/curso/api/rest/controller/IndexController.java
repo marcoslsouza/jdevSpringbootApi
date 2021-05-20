@@ -1,12 +1,12 @@
 package curso.api.rest.controller;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,30 +37,17 @@ public class IndexController {
 	@GetMapping(value = "/{id}", produces = "application/json")
 	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
 		
-		/*List<Usuario> lista = new ArrayList<>();
-		
-		Usuario usuario = new Usuario();
-		usuario.setId(50L);
-		usuario.setLogin("marcos@gmail.com");
-		usuario.setNome("Marcos");
-		usuario.setSenha("123");
-		lista.add(usuario);
-		
-		Usuario usuario2 = new Usuario();
-		usuario2.setId(51L);
-		usuario2.setLogin("maria@gmail.com");
-		usuario2.setNome("Maria");
-		usuario2.setSenha("122");
-		lista.add(usuario2);*/
-		
-		try {
+		/*try {
 			Optional<Usuario> usuarios = usuarioRepository.findById(id);
-			// return ResponseEntity.ok(usuario) 
 			return new ResponseEntity<Usuario>(usuarios.get(), HttpStatus.OK);
 		} catch(NoSuchElementException e) {
 			new NoSuchElementException("Nenhum registro encontrado!" + e);
 		}
-		return null;
+		return null;*/
+		
+		return usuarioRepository.findById(id).map(usuario -> { 
+			return ResponseEntity.ok().body(usuario);
+		}).orElse(ResponseEntity.notFound().build());
 	}
 	
 	@GetMapping(value = "/", produces = "application/json")
@@ -88,5 +75,13 @@ public class IndexController {
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
+	}
+	
+	@DeleteMapping(value = "/{id}", produces = "application/json")
+	public ResponseEntity<?> excluir(@PathVariable Long id) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuarioRepository.deleteById(id);
+			return ResponseEntity.ok().build();
+		}).orElse(ResponseEntity.notFound().build());
 	}
 }

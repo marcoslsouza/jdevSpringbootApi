@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.ManyToOne;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,16 @@ public class IndexController {
 	
 	@PostMapping(value = "/", produces = "application/json")
 	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
+		
+		// Ajuste para salvar telefones.
+		// Varre o List<Telefone> em Usuario e seta o usuario aos telefones do List<Telefone>.
+		// Motivo nao e recebido pelo JSON a FK usuario_id na entidade telefone.
+		// Caso perca a associacao por alteracao no For abaixo acrescente @ManyToOne(optional = false) 
+		// na propriedade usuario da entidade Telefone, para nao cadastrar telefone sem usuario.
+		for(int i = 0; i < usuario.getTelefones().size(); i++) {
+			usuario.getTelefones().get(i).setUsuario(usuario);
+		}
+		
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
@@ -92,7 +103,7 @@ public class IndexController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 	
-	// Telefones
+	// Cadastra telefones para usuarios
 	@PostMapping(value = "/{id}/telefone", produces = "application/json")
 	public ResponseEntity<Telefone> cadastrar(@PathVariable(value = "id") Long id, @RequestBody Telefone telefone) {
 		

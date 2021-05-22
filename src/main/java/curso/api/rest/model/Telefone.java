@@ -29,7 +29,7 @@ public class Telefone {
 	
 	@JsonIgnore
 	@JoinColumn(name = "usuario_id")
-	@ManyToOne
+	@ManyToOne(optional = false) // optional = false Nao cadastra telefone sem usuario.
 	@EqualsAndHashCode.Exclude
 	private Usuario usuario;
 }

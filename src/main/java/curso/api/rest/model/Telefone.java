@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +27,7 @@ public class Telefone {
 	@EqualsAndHashCode.Exclude
 	private String numero;
 	
+	@JsonIgnore
 	@JoinColumn(name = "usuario_id")
 	@ManyToOne
 	@EqualsAndHashCode.Exclude

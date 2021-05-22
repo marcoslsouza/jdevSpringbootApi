@@ -3,6 +3,8 @@ package curso.api.rest.controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import curso.api.rest.model.Telefone;
 import curso.api.rest.model.Usuario;
+import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
 
 @RestController
@@ -24,6 +28,9 @@ public class IndexController {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	private TelefoneRepository telefoneRepository;
 	
 	// Exemplo com parametros na URL
 	// http://localhost:8080/usuario/?nome=Marcos
@@ -83,5 +90,19 @@ public class IndexController {
 			usuarioRepository.deleteById(id);
 			return ResponseEntity.ok().build();
 		}).orElse(ResponseEntity.notFound().build());
+	}
+	
+	// Telefones
+	@PostMapping(value = "/{id}/telefone", produces = "application/json")
+	public ResponseEntity<Telefone> cadastrar(@PathVariable(value = "id") Long id, @RequestBody Telefone telefone) {
+		
+		// Localiza o usuario
+		Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+		telefone.setUsuario(usuario);
+		
+		// Salva o telefone 
+		Telefone telefoneSalvo = telefoneRepository.save(telefone);
+		
+		return new ResponseEntity<Telefone>(telefoneSalvo, HttpStatus.OK);
 	}
 }

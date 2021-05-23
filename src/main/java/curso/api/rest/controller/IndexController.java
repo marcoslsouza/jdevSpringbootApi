@@ -23,7 +23,6 @@ import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/usuario")
 public class IndexController {
@@ -59,6 +58,7 @@ public class IndexController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value = "/", produces = "application/json")
 	public ResponseEntity<List<Usuario>> usuario() {
 		List<Usuario> lista = (List<Usuario>) usuarioRepository.findAll();

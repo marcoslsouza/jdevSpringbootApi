@@ -58,7 +58,6 @@ public class IndexController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 	
-	@CrossOrigin(origins = "*")
 	@GetMapping(value = "/", produces = "application/json")
 	public ResponseEntity<List<Usuario>> usuario() {
 		List<Usuario> lista = (List<Usuario>) usuarioRepository.findAll();

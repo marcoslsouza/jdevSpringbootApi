@@ -20,14 +20,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 @RestController
 @EnableAutoConfiguration
-public class CursoSpringRestApiApplication implements WebMvcConfigurer {
+
+// public class CursoSpringRestApiApplication implements WebMvcConfigurer
+// Implementa este metodo "Configuracao centralizada"
+/*
+ * @Override
+	public void addCorsMappings(CorsRegistry registry) {
+		registry.addMapping("/usuario/").allowedMethods("GET").allowedOrigins("C:/Users/marco/Desktop/teste_cross_origin.html");
+	}
+ * 
+ */
+public class CursoSpringRestApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursoSpringRestApiApplication.class, args);
-	}
-	
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/usuario/").allowedMethods("GET").allowedOrigins("C:/Users/marco/Desktop/teste_cross_origin.html");
 	}
 }

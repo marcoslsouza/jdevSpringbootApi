@@ -1,0 +1,32 @@
+<html>
+
+<head>
+
+	<script
+	  src="https://code.jquery.com/jquery-2.2.4.min.js"
+	  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+	  crossorigin="anonymous"></script>
+	
+	<meta charset="UTF-8">
+</head>
+
+<body>
+
+	<script>
+		$(document).ready(
+			function() {
+				$.ajax({
+					url: 'http://localhost:8080/spring-boot/usuario/',
+					method: 'GET'
+				}).then(function (data, status, info) {
+					console.log(data);
+					$('#dados').html(data[0].id + '<br />' + data[0].nome + '<br />' + data[0].telefones[0].numero);
+				});
+			}
+		);
+	</script>
+	
+	<span id="dados"></span>
+</body>
+
+</html>

@@ -1,3 +1,3 @@
 # jdevSpringbootApi
 
-API Spring Boot
+API Spring Boot - CRUD básico

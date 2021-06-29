@@ -45,13 +45,13 @@ public class JWTTokenAutenticacaoService {
 				.signWith(SignatureAlgorithm.HS512, SECRET).compact();
 		
 		// Junta token com o prefixo
-		String token = TOKEN_PREFIX + JWT; // Ex. Bearer 54555dsdf4d54545www4e5...
+		String token = TOKEN_PREFIX + " " + JWT; // Ex. Bearer 54555dsdf4d54545www4e5...
 		
 		//Adiciona no cabecalho http
 		response.addHeader(HEADER_STRING, token); // Ex. Authorization Bearer 54555dsdf4d54545www4e5...
 		
 		// Escreve token como resposta Json no corpo HTTP
-		response.getWriter().write("{\"Authorization\": \""+token+"\"}");
+		response.getWriter().write("{\""+ HEADER_STRING +"\": \""+ token +"\"}");
 	}
 	
 	// Retorna o usuario validado com token ou caso nao seja valido retorna null

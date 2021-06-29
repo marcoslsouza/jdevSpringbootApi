@@ -9,6 +9,7 @@ import curso.api.rest.model.Usuario;
 @Repository
 public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	
+	//@Query(value = "SELECT * FROM usuario u WHERE u.login = ?1", nativeQuery = true)
 	@Query("SELECT u FROM Usuario u WHERE u.login = ?1")
 	Usuario findUserByLogin(String login);
 }

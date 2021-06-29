@@ -8,6 +8,7 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -83,6 +84,7 @@ public class IndexController {
 			usuario.getTelefones().get(i).setUsuario(usuario);
 		}
 		
+		usuario.setSenha(this.criptografaSenha(usuario));
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
@@ -95,6 +97,7 @@ public class IndexController {
 			usuario.getTelefones().get(i).setUsuario(usuario);
 		}
 		
+		usuario.setSenha(this.criptografaSenha(usuario));
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
@@ -120,5 +123,9 @@ public class IndexController {
 		Telefone telefoneSalvo = telefoneRepository.save(telefone);
 		
 		return new ResponseEntity<Telefone>(telefoneSalvo, HttpStatus.OK);
+	}
+	
+	private String criptografaSenha(Usuario usuario) {
+		return new BCryptPasswordEncoder().encode(usuario.getSenha());
 	}
 }

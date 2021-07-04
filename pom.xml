@@ -79,6 +79,19 @@
 	      <artifactId>jjwt</artifactId>
 	      <version>0.9.1</version>
 	    </dependency>
+	    
+	    <!-- Hikari gerenciamento de pool de conexao -->
+	    <dependency>
+		    <groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+		    <version>4.0.3</version>
+		</dependency>
+		
+		<!--  Dependencia de cache -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

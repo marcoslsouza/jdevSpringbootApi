@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,6 +44,7 @@ public class IndexController {
 	// Retorna o JSON usuario
 	// @PathVariable porque e na arquitetura REST
 	@GetMapping(value = "/{id}", produces = "application/json")
+	@Cacheable("cacheFindByIdUsuario")
 	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
 		
 		/*try {
@@ -59,8 +61,13 @@ public class IndexController {
 	}
 	
 	@GetMapping(value = "/", produces = "application/json")
-	public ResponseEntity<List<Usuario>> usuario() {
+	@Cacheable("cacheListaUsuario") // Necessita de ativar no pom.xml e CursoSpringRestApiApplication.java
+	public ResponseEntity<List<Usuario>> usuario() throws InterruptedException {
 		List<Usuario> lista = (List<Usuario>) usuarioRepository.findAll();
+		
+		// Segura o processamento em 6 segundos simulando um processo lento, para testar o cache
+		Thread.sleep(6000);
+		
 		return new ResponseEntity<List<Usuario>>(lista, HttpStatus.OK);
 	}
 	

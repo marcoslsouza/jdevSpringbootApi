@@ -61,12 +61,15 @@ public class JWTTokenAutenticacaoService {
 		String token = request.getHeader(HEADER_STRING);
 		
 		if(token != null) {
+			
+			String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
+			
 			// Faz a validacao do token do usuario na requisicao
 			// Passa a senha unica, retira o Bearer com o replace, 
 			// descompacta tudo e retorna somente o usuario
 			String user = Jwts.parser()
 					.setSigningKey(SECRET)
-					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+					.parseClaimsJws(tokenLimpo)
 					.getBody().getSubject();
 			if(user != null) {
 				// ApplicationContextLoad criada em curso.api.rest. 
@@ -77,8 +80,12 @@ public class JWTTokenAutenticacaoService {
 				
 				// Retornar o usuario logado
 				if(usuario != null) {
-					return new UsernamePasswordAuthenticationToken
-							(usuario.getLogin(), usuario.getSenha(), usuario.getAuthorities());
+					
+					// Faz a validacao por token em banco de dados
+					if(tokenLimpo.equals(usuario.getToken())) {
+						return new UsernamePasswordAuthenticationToken
+								(usuario.getLogin(), usuario.getSenha(), usuario.getAuthorities());
+					}
 				}
 			}
 		}

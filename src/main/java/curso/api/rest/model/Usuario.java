@@ -52,6 +52,9 @@ public class Usuario implements UserDetails {
 	@EqualsAndHashCode.Exclude
 	private String nome;
 	
+	@Column
+	private String token;
+	
 	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL)
 	@EqualsAndHashCode.Exclude
 	private List<Telefone> telefones = new ArrayList<Telefone>();

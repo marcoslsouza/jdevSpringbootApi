@@ -2,6 +2,7 @@ package curso.api.rest.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,6 +32,9 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter {
 		// Ativando a permissao para o acesso a página inicial do sistema Ex: sistema.com.br/index*/
 		.disable().authorizeRequests().antMatchers("/").permitAll()
 		.antMatchers("/index").permitAll()
+		
+		// Libera o uso da API. Configuracao de CORS (Tambem configurado em JWTTokenAutenticacaoService e JWTApiAutenticacaoFilter)
+		.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 		
 		// URL de logout - Redireciona após o usuario deslogar do sistema
 		.anyRequest().authenticated().and().logout().logoutSuccessUrl("/index")

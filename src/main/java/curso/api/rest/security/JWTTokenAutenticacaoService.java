@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import curso.api.rest.ApplicationContextLoad;
 import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.UsuarioRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -64,35 +65,49 @@ public class JWTTokenAutenticacaoService {
 		// Pega o token enviado no cabecalho HTTP
 		String token = request.getHeader(HEADER_STRING);
 		
-		if(token != null) {
+		// Tratamento do token expirado
+		try {
 			
-			String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
-			
-			// Faz a validacao do token do usuario na requisicao
-			// Passa a senha unica, retira o Bearer com o replace, 
-			// descompacta tudo e retorna somente o usuario
-			String user = Jwts.parser()
-					.setSigningKey(SECRET)
-					.parseClaimsJws(tokenLimpo)
-					.getBody().getSubject();
-			if(user != null) {
-				// ApplicationContextLoad criada em curso.api.rest. 
-				// Essa classe pega tudo o que foi carregado no contexto de aplicacao.
-				// Sem ela corre o risco de nao recuperar o usuario.
-				Usuario usuario = ApplicationContextLoad.getApplicationContext()
-						.getBean(UsuarioRepository.class).findUserByLogin(user);
+			if(token != null) {
 				
-				// Retornar o usuario logado
-				if(usuario != null) {
+				String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
+				
+				// Faz a validacao do token do usuario na requisicao
+				// Passa a senha unica, retira o Bearer com o replace, 
+				// descompacta tudo e retorna somente o usuario
+				String user = Jwts.parser()
+						.setSigningKey(SECRET)
+						.parseClaimsJws(tokenLimpo)
+						.getBody().getSubject();
+				if(user != null) {
+					// ApplicationContextLoad criada em curso.api.rest. 
+					// Essa classe pega tudo o que foi carregado no contexto de aplicacao.
+					// Sem ela corre o risco de nao recuperar o usuario.
+					Usuario usuario = ApplicationContextLoad.getApplicationContext()
+							.getBean(UsuarioRepository.class).findUserByLogin(user);
 					
-					// Faz a validacao por token em banco de dados
-					if(tokenLimpo.equals(usuario.getToken())) {
-						return new UsernamePasswordAuthenticationToken
-								(usuario.getLogin(), usuario.getSenha(), usuario.getAuthorities());
+					// Retornar o usuario logado
+					if(usuario != null) {
+						
+						// Faz a validacao por token em banco de dados
+						if(tokenLimpo.equals(usuario.getToken())) {
+							return new UsernamePasswordAuthenticationToken
+									(usuario.getLogin(), usuario.getSenha(), usuario.getAuthorities());
+						}
 					}
 				}
 			}
+		} catch(ExpiredJwtException ex) {
+			
+			try {
+				response.getOutputStream()
+					.println("Seu TOKEN está expirado, faça o login ou informe um novo TOKEN para autenticação.");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		
 		
 		liberacaoCORS(response);
 		

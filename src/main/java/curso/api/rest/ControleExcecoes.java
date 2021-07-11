@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ControleExcecoes extends ResponseEntityExceptionHandler {
 
-	/*********************Tratamento de erros comuns********************************/
+	/*********************Tratamento de erros comuns*****************************************************/
 	
 	// Array que determina as excecoes que serao interceptadas
 	@ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})

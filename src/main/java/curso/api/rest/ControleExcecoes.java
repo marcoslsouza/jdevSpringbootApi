@@ -1,7 +1,10 @@
 package curso.api.rest;
 
+import java.sql.SQLException;
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ControleExcecoes extends ResponseEntityExceptionHandler {
 
+	/*********************Tratamento de erros comuns********************************/
+	
 	// Array que determina as excecoes que serao interceptadas
 	@ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
 	@Override
@@ -50,6 +55,46 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler {
 		} else { // Demais erros
 			msg = ex.getMessage();
 		}
+		
+		return msg;
+	}
+	
+	/**********************************Tratamento de erros de Banco de dados ********************************/
+	
+	// Mapea alguns erros a nivel de banco de dados. 
+	// (DataIntegrityViolationException => excluir registro com referencia em outros registros,)
+	@ExceptionHandler({DataIntegrityViolationException.class, ConstraintViolationException.class,
+		SQLException.class})
+	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
+		
+		return new ResponseEntity<>(this.tratamentoDeErrosDoBancoDeDados(ex), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	private ObjetoErro tratamentoDeErrosDoBancoDeDados(Exception ex) {
+			
+		ObjetoErro objetoErro = new ObjetoErro();
+		objetoErro.setError(this.tratamentoDeMsgDeErrosDoBancoDeDados(ex));
+		// Sempre erros de back-end HttpStatus.INTERNAL_SERVER_ERROR
+		objetoErro.setCode(HttpStatus.INTERNAL_SERVER_ERROR + " ==> " + 
+				HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+		
+		return objetoErro;
+	}
+	
+	private String tratamentoDeMsgDeErrosDoBancoDeDados(Exception ex) {
+		String msg = "";
+			
+		if(ex instanceof DataIntegrityViolationException) {
+			msg = ((DataIntegrityViolationException) ex).getCause().getCause().getMessage();
+		} else
+			if(ex instanceof ConstraintViolationException) {
+				msg = ((ConstraintViolationException) ex).getCause().getCause().getMessage();
+			} else
+				if(ex instanceof SQLException) {
+					msg = ((SQLException) ex).getCause().getCause().getMessage();
+				} else {
+					msg = ex.getMessage();
+				  }
 		
 		return msg;
 	}

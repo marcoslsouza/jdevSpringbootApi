@@ -52,6 +52,10 @@ public class Usuario implements UserDetails {
 	@EqualsAndHashCode.Exclude
 	private String nome;
 	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String cpf;
+	
 	@Column
 	private String token;
 	

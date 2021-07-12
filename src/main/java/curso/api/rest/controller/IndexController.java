@@ -1,6 +1,7 @@
 package curso.api.rest.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import curso.api.rest.model.Telefone;
 import curso.api.rest.model.Usuario;
+import curso.api.rest.model.UsuarioDTO;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
 
@@ -48,19 +50,19 @@ public class IndexController {
 	@GetMapping(value = "/{id}", produces = "application/json")
 	@CacheEvict(value = "cacheFindByIdUsuario", allEntries = true) // Limpa o cache que não é utilizado
 	@CachePut("cacheFindByIdUsuario") // Identifica que vai ter atualizacoes e coloca no cache
-	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<UsuarioDTO> init(@PathVariable(value = "id") Long id) {
 		
-		/*try {
+		try {
 			Optional<Usuario> usuarios = usuarioRepository.findById(id);
-			return new ResponseEntity<Usuario>(usuarios.get(), HttpStatus.OK);
+			return new ResponseEntity<UsuarioDTO>(new UsuarioDTO(usuarios.get()), HttpStatus.OK);
 		} catch(NoSuchElementException e) {
 			new NoSuchElementException("Nenhum registro encontrado!" + e);
 		}
-		return null;*/
+		return null;
 		
-		return usuarioRepository.findById(id).map(usuario -> { 
+		/*return usuarioRepository.findById(id).map(usuario -> { 
 			return ResponseEntity.ok().body(usuario);
-		}).orElse(ResponseEntity.notFound().build());
+		}).orElse(ResponseEntity.notFound().build());*/
 	}
 	
 	@GetMapping(value = "/", produces = "application/json")

@@ -51,6 +51,12 @@ public class JWTTokenAutenticacaoService {
 		//Adiciona no cabecalho http
 		response.addHeader(HEADER_STRING, token); // Ex. Authorization Bearer 54555dsdf4d54545www4e5...
 		
+		// Atualiza o token no banco de dados
+		// ApplicationContextLoad => recupera tudo no contexto. Essa classe foi criada.
+		ApplicationContextLoad.getApplicationContext()
+			.getBean(UsuarioRepository.class)
+			.atualizaTokkenDoUsuario(JWT, username);
+		
 		// Liberando a resposta para portas diferentes que usam a API
 		liberacaoCORS(response);
 		

@@ -56,6 +56,30 @@ public class Usuario implements UserDetails {
 	@EqualsAndHashCode.Exclude
 	private String cpf;
 	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String cep;
+	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String logradouro;
+	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String complemento;
+	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String bairro;
+	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String localidade;
+	
+	@Column(nullable = true)
+	@EqualsAndHashCode.Exclude
+	private String uf;
+	
 	@Column
 	private String token;
 	

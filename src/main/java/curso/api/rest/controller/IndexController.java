@@ -1,5 +1,13 @@
 package curso.api.rest.controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,6 +29,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.gson.Gson;
 
 import curso.api.rest.model.Telefone;
 import curso.api.rest.model.Usuario;
@@ -85,7 +95,7 @@ public class IndexController {
 	}
 	
 	@PostMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
+	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) throws IOException {
 		
 		// Ajuste para salvar telefones.
 		// Varre o List<Telefone> em Usuario e seta o usuario aos telefones do List<Telefone>.
@@ -96,10 +106,47 @@ public class IndexController {
 			usuario.getTelefones().get(i).setUsuario(usuario);
 		}
 		
+		// Cadastra endereco
+		if(usuario.getCep() != null && !usuario.getCep().isEmpty()) {
+			StringBuilder dados = this.retornaDadosEndereco(usuario.getCep());
+			
+			// Converte os dados do array para JSON (Gson lib do Google)
+			Usuario usuarioAux = new Gson().fromJson(dados.toString(), Usuario.class);
+			usuario.setCep(usuarioAux.getCep());
+			usuario.setLogradouro(usuarioAux.getLogradouro());
+			usuario.setComplemento(usuarioAux.getComplemento());
+			usuario.setBairro(usuarioAux.getBairro());
+			usuario.setLocalidade(usuarioAux.getLocalidade());
+			usuario.setUf(usuarioAux.getUf());
+		}
+		
 		usuario.setSenha(this.criptografaSenha(usuario));
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
+	}
+	
+	// Chamada a API ViaCEP
+	private StringBuilder retornaDadosEndereco(String cep) throws IOException {
+		URL url = new URL("https://viacep.com.br/ws/"+cep+"/json/");
+		
+		// Abre a conexao
+		URLConnection connection = url.openConnection();
+		
+		// Recebe os dados
+		InputStream is = connection.getInputStream();
+		
+		// Preparar a leitura
+		BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		
+		// Ler linha por linha e monta um array
+		String dados = "";
+		StringBuilder jsonCep = new StringBuilder();
+		while((cep = br.readLine()) != null) {
+			jsonCep.append(cep);
+		}
+		
+		return jsonCep;
 	}
 	
 	@PutMapping(value = "/", produces = "application/json")

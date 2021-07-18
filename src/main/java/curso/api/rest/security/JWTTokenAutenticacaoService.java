@@ -125,19 +125,19 @@ public class JWTTokenAutenticacaoService {
 	private void liberacaoCORS(HttpServletResponse response) {
 		
 		if(response.getHeader("Access-Control-Allow-Origin") == null) {
-			response.addHeader("Access-Control-Allow-Origin", "*");
+			response.addHeader("Access-Control-Allow-Origin", "http://localhost:4200"); // "*" Libera para todas as requisicoes
 		}
 		
-		if(response.getHeader("Access-Control-Allow-Headers") == null) {
-			response.addHeader("Access-Control-Allow-Headers", "*");
+		if(response.getHeader("Access-Control-Allow-Headers") == null) { 
+			response.addHeader("Access-Control-Allow-Headers", "http://localhost:4200"); // "*" Libera para todas as requisicoes
 		}
 		
-		if(response.getHeader("Access-Control-Request-Headers") == null) {
-			response.addHeader("Access-Control-Request-Headers", "*");
+		if(response.getHeader("Access-Control-Request-Headers") == null) { 
+			response.addHeader("Access-Control-Request-Headers", "http://localhost:4200"); // "*" Libera para todas as requisicoes
 		}
 		
-		if(response.getHeader("Access-Control-Allow-Methods") == null) {
-			response.addHeader("Access-Control-Allow-Methods", "*");
+		if(response.getHeader("Access-Control-Allow-Methods") == null) { 
+			response.addHeader("Access-Control-Allow-Methods", "http://localhost:4200"); // "*" Libera para todas as requisicoes
 		}
 	}
 	

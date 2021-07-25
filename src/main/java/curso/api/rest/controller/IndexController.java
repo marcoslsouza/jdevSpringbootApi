@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,13 +80,25 @@ public class IndexController {
 	@GetMapping(value = "/", produces = "application/json")
 	@CacheEvict(value = "cacheListUsuario", allEntries = true) // Necessita de ativar no pom.xml e CursoSpringRestApiApplication.java
 	@CachePut("cacheListUsuario")
-	public ResponseEntity<List<Usuario>> usuario() throws InterruptedException {
+	public ResponseEntity<List<UsuarioDTO>> usuario() throws InterruptedException {
+		
 		List<Usuario> lista = (List<Usuario>) usuarioRepository.findAll();
 		
-		// Segura o processamento em 6 segundos simulando um processo lento, para testar o cache
-		Thread.sleep(6000);
+		List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>();
+		for(Usuario usuario : lista) {
+			UsuarioDTO dto = new UsuarioDTO();
+			dto.setId(usuario.getId());
+			dto.setUserLogin(usuario.getLogin());
+			dto.setUserNome(usuario.getNome());
+			dto.setUserCpf(usuario.getCpf());
+			dto.setUserTelefones(usuario.getTelefones());
+			usuarios.add(dto);
+		}
 		
-		return new ResponseEntity<List<Usuario>>(lista, HttpStatus.OK);
+		// Segura o processamento em 6 segundos simulando um processo lento, para testar o cache
+		// Thread.sleep(6000);
+		
+		return new ResponseEntity<List<UsuarioDTO>>(usuarios, HttpStatus.OK);
 	}
 	
 	// application/pdf

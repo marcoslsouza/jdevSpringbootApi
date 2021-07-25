@@ -31,13 +31,13 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter {
 		
 		// Ativando a permissao para o acesso a página inicial do sistema Ex: sistema.com.br/index*/
 		.disable().authorizeRequests().antMatchers("/").permitAll()
-		.antMatchers("/index").permitAll()
+		.antMatchers("/").permitAll()
 		
 		// Libera o uso da API. Configuracao de CORS (Tambem configurado em JWTTokenAutenticacaoService e JWTApiAutenticacaoFilter)
 		.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 		
 		// URL de logout - Redireciona após o usuario deslogar do sistema
-		.anyRequest().authenticated().and().logout().logoutSuccessUrl("/index")
+		.anyRequest().authenticated().and().logout().logoutSuccessUrl("/")
 		
 		// Mapeia URL de logout e invalida o usuario
 		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))

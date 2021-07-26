@@ -46,6 +46,9 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter {
 		.and().addFilterBefore(new JWTLoginFilter("/login", authenticationManager()), 
 				UsernamePasswordAuthenticationFilter.class)
 		
+		// Ativa o CORS e desativa o CSRF
+		.cors().and().csrf().disable()
+		
 		// Filtra demais requisicoes para verificar a presenca do TOKEN JWT no HEADER HTTP
 		.addFilterBefore(new JWTApiAutenticacaoFilter(), UsernamePasswordAuthenticationFilter.class);
 	}

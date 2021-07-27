@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
@@ -80,7 +81,7 @@ public class IndexController {
 	@GetMapping(value = "/", produces = "application/json")
 	@CacheEvict(value = "cacheListUsuario", allEntries = true) // Necessita de ativar no pom.xml e CursoSpringRestApiApplication.java
 	@CachePut("cacheListUsuario")
-	public ResponseEntity<List<UsuarioDTO>> usuario() throws InterruptedException {
+	public ResponseEntity<List<UsuarioDTO>> usuario() {
 		
 		List<Usuario> lista = (List<Usuario>) usuarioRepository.findAll();
 		
@@ -97,6 +98,27 @@ public class IndexController {
 		
 		// Segura o processamento em 6 segundos simulando um processo lento, para testar o cache
 		// Thread.sleep(6000);
+		
+		return new ResponseEntity<List<UsuarioDTO>>(usuarios, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/por-nome/{nome}", produces = "application/json")
+	@CacheEvict(value = "cachePesquisaUsuarioPorNome", allEntries = true) // Necessita de ativar no pom.xml e CursoSpringRestApiApplication.java
+	@CachePut("cachePesquisaUsuarioPorNome")
+	public ResponseEntity<List<UsuarioDTO>> pesquisarUsuarioPorNome(@PathVariable("nome") String nome) {
+		
+		List<Usuario> lista = (List<Usuario>) usuarioRepository.findUserByName(nome);
+		
+		List<UsuarioDTO> usuarios = new ArrayList<UsuarioDTO>();
+		for(Usuario usuario : lista) {
+			UsuarioDTO dto = new UsuarioDTO();
+			dto.setId(usuario.getId());
+			dto.setUserLogin(usuario.getLogin());
+			dto.setUserNome(usuario.getNome());
+			dto.setUserCpf(usuario.getCpf());
+			dto.setUserTelefones(usuario.getTelefones());
+			usuarios.add(dto);
+		}
 		
 		return new ResponseEntity<List<UsuarioDTO>>(usuarios, HttpStatus.OK);
 	}

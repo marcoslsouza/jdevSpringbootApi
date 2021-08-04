@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -14,15 +12,15 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.gson.Gson;
 
 import curso.api.rest.model.Telefone;
 import curso.api.rest.model.Usuario;
@@ -131,19 +126,29 @@ public class IndexController {
 	}
 	
 	@PostMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) throws IOException {
+	public ResponseEntity<UsuarioDTO> cadastrar(@RequestBody @Valid UsuarioDTO usuarioDTO) throws IOException {
+		
+		// Converte para Usuario
+		Usuario entrada = new Usuario();
+		entrada.setId(usuarioDTO.getId());
+		entrada.setNome(usuarioDTO.getUserNome());
+		entrada.setLogin(usuarioDTO.getUserLogin());
+		entrada.setCpf(usuarioDTO.getUserCpf());
 		
 		// Ajuste para salvar telefones.
 		// Varre o List<Telefone> em Usuario e seta o usuario aos telefones do List<Telefone>.
 		// Motivo nao e recebido pelo JSON a FK usuario_id na entidade telefone.
 		// Caso perca a associacao por alteracao no For abaixo acrescente @ManyToOne(optional = false) 
 		// na propriedade usuario da entidade Telefone, para nao cadastrar telefone sem usuario.
-		for(int i = 0; i < usuario.getTelefones().size(); i++) {
+		/*for(int i = 0; i < usuario.getTelefones().size(); i++) {
 			usuario.getTelefones().get(i).setUsuario(usuario);
-		}
+		}*/
 		
 		// Cadastra endereco
-		if(usuario.getCep() != null && !usuario.getCep().isEmpty()) {
+		/*
+		 * Salvar futuramente o CEP
+		 * 
+		 * if(usuario.getCep() != null && !usuario.getCep().isEmpty()) {
 			StringBuilder dados = this.retornaDadosEndereco(usuario.getCep());
 			
 			// Converte os dados do array para JSON (Gson lib do Google)
@@ -154,12 +159,21 @@ public class IndexController {
 			usuario.setBairro(usuarioAux.getBairro());
 			usuario.setLocalidade(usuarioAux.getLocalidade());
 			usuario.setUf(usuarioAux.getUf());
-		}
+		}*/
 		
-		usuario.setSenha(this.criptografaSenha(usuario));
-		Usuario usuarioSalvo = usuarioRepository.save(usuario);
+		// Salva uma senha padrao
+		entrada.setSenha(new BCryptPasswordEncoder().encode("445566"));
 		
-		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
+		Usuario usuarioSalvo = usuarioRepository.save(entrada);
+		
+		// Converte para UsuarioDTO
+		UsuarioDTO saida = new UsuarioDTO();
+		saida.setId(entrada.getId());
+		saida.setUserNome(entrada.getNome());
+		saida.setUserLogin(entrada.getLogin());
+		saida.setUserCpf(entrada.getCpf());
+		
+		return new ResponseEntity<UsuarioDTO>(saida, HttpStatus.OK);
 	}
 	
 	// Chamada a API ViaCEP
@@ -186,22 +200,42 @@ public class IndexController {
 	}
 	
 	@PutMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> atualizar(@RequestBody Usuario usuario) {
+	public ResponseEntity<UsuarioDTO> atualizar(@RequestBody @Valid UsuarioDTO usuarioDTO) {
 		
-		for(int i = 0; i < usuario.getTelefones().size(); i++) {
+		// Recebe UsuarioDTO e passa para Usuario
+		Usuario entrada = new Usuario();
+		entrada.setId(usuarioDTO.getId());
+		entrada.setNome(usuarioDTO.getUserNome());
+		entrada.setLogin(usuarioDTO.getUserLogin());
+		entrada.setCpf(usuarioDTO.getUserCpf());
+		
+		// Telefones implementar futuramente
+		/*
+		 * O cadastro de telefones sera separado
+		 * 
+		 * for(int i = 0; i < usuario.getTelefones().size(); i++) {
 			usuario.getTelefones().get(i).setUsuario(usuario);
-		}
+		}*/
 		
-		// Atualizar a senha
-		Usuario userTemp = usuarioRepository.findUserByLogin(usuario.getLogin());
-		if(!userTemp.getSenha().equals(usuario.getSenha())) {
-			usuario.setSenha(this.criptografaSenha(usuario));
-		}
+		// Recupera a senha para salva-la novamente.
+		Optional<Usuario> recuperaSenha = usuarioRepository.findById(entrada.getId());
+		String senhaCriptografada = "";
+		if(recuperaSenha.get().getSenha().length() <= 6) {
+			senhaCriptografada = this.criptografaSenha(recuperaSenha.get());
+			entrada.setSenha(senhaCriptografada);
+		} else
+			entrada.setSenha(recuperaSenha.get().getSenha());
 		
-		usuario.setSenha(this.criptografaSenha(usuario));
-		Usuario usuarioSalvo = usuarioRepository.save(usuario);
+		Usuario usuarioSalvo = usuarioRepository.save(entrada);
+			
+		// Retorna o UsuarioDTO para Usuario
+		UsuarioDTO saida = new UsuarioDTO();
+		saida.setId(usuarioSalvo.getId());
+		saida.setUserNome(usuarioSalvo.getNome());
+		saida.setUserLogin(usuarioSalvo.getLogin());
+		saida.setUserCpf(usuarioSalvo.getCpf());
 		
-		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
+		return new ResponseEntity<UsuarioDTO>(saida, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "/{id}", produces = "application/json")

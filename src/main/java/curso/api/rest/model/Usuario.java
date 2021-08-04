@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -52,6 +53,7 @@ public class Usuario implements UserDetails {
 	@EqualsAndHashCode.Exclude
 	private String nome;
 	
+	@CPF(message = "O CPF é inválido!")
 	@Column(nullable = true)
 	@EqualsAndHashCode.Exclude
 	private String cpf;
@@ -97,7 +99,7 @@ public class Usuario implements UserDetails {
 			foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), 
 			inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false, 
 			updatable = false, foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
-	private List<Role> roles;
+	private List<Role> roles = new ArrayList<Role>();
 
 	// Acessos do usuario
 	@Override

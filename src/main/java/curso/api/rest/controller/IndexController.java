@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -126,7 +126,7 @@ public class IndexController {
 	}
 	
 	@PostMapping(value = "/", produces = "application/json")
-	public ResponseEntity<UsuarioDTO> cadastrar(@RequestBody @Valid UsuarioDTO usuarioDTO) throws IOException {
+	public ResponseEntity<UsuarioDTO> cadastrar(@RequestBody @Valid UsuarioDTO usuarioDTO) {
 		
 		// Converte para Usuario
 		Usuario entrada = new Usuario();
@@ -134,6 +134,11 @@ public class IndexController {
 		entrada.setNome(usuarioDTO.getUserNome());
 		entrada.setLogin(usuarioDTO.getUserLogin());
 		entrada.setCpf(usuarioDTO.getUserCpf());
+		
+		// Verifica a existencia do login
+		if(this.verificaExistenciaLogin(entrada)) {
+			throw new ConstraintViolationException("Login já cadastrado!", null);
+		}
 		
 		// Ajuste para salvar telefones.
 		// Varre o List<Telefone> em Usuario e seta o usuario aos telefones do List<Telefone>.
@@ -262,5 +267,13 @@ public class IndexController {
 	
 	private String criptografaSenha(Usuario usuario) {
 		return new BCryptPasswordEncoder().encode(usuario.getSenha());
+	}
+	
+	private boolean verificaExistenciaLogin(Usuario usuario) {
+		if(this.usuarioRepository.findUserByLogin(usuario.getLogin()) != null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

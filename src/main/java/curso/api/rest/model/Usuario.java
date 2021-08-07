@@ -6,17 +6,15 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.security.core.GrantedAuthority;
@@ -90,17 +88,24 @@ public class Usuario implements UserDetails {
 	private List<Telefone> telefones = new ArrayList<Telefone>();
 	
 	// Papeis ou acessos
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.EAGER) // Sempre que carregar um usuario, também carregar seus acessos.
+	//@JsonIgnore
+	//@OneToMany(fetch = FetchType.EAGER) // Sempre que carregar um usuario, também carregar seus acessos.
 	// Nome da tabela que vai ser criada "usuarios_role"
-	@JoinTable(name = "usuarios_role", uniqueConstraints = @UniqueConstraint(
+	/*@JoinTable(name = "usuarios_role", uniqueConstraints = @UniqueConstraint(
 			columnNames = {"usuario_id", "role_id"}, name = "unique_role_user"),
 			joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false,
 			foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), 
 			inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false, 
-			updatable = false, foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
+			updatable = false, foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))*/
+	//private List<Role> roles = new ArrayList<Role>();
+	
+	// Fonte: https://www.baeldung.com/role-and-privilege-for-spring-security-registration
+	@JsonIgnore
+	@ManyToMany(fetch = FetchType.EAGER) 
+    @JoinTable(name = "usuarios_role", joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id"), 
+    inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
 	private List<Role> roles = new ArrayList<Role>();
-
+	
 	// Acessos do usuario
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

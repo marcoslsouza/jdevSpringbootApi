@@ -35,6 +35,7 @@ import curso.api.rest.model.Usuario;
 import curso.api.rest.model.UsuarioDTO;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
+import curso.api.rest.service.ImplementacaoUserDetailsService;
 
 @RestController
 @RequestMapping("/usuario")
@@ -45,6 +46,9 @@ public class IndexController {
 	
 	@Autowired
 	private TelefoneRepository telefoneRepository;
+	
+	@Autowired
+	private ImplementacaoUserDetailsService implementacaoUserDetailsService;
 	
 	// Exemplo com parametros na URL
 	// http://localhost:8080/usuario/?nome=Marcos
@@ -171,6 +175,13 @@ public class IndexController {
 		
 		Usuario usuarioSalvo = usuarioRepository.save(entrada);
 		
+		try {
+			// Cria Role (Funcao)
+			this.implementacaoUserDetailsService.criaRole(usuarioSalvo.getId());
+		} catch(Exception e) {
+			this.usuarioRepository.deleteById(usuarioSalvo.getId());
+		}
+		
 		// Converte para UsuarioDTO
 		UsuarioDTO saida = new UsuarioDTO();
 		saida.setId(entrada.getId());
@@ -213,14 +224,11 @@ public class IndexController {
 		entrada.setNome(usuarioDTO.getUserNome());
 		entrada.setLogin(usuarioDTO.getUserLogin());
 		entrada.setCpf(usuarioDTO.getUserCpf());
+		entrada.setTelefones(usuarioDTO.getUserTelefones());
 		
-		// Telefones implementar futuramente
-		/*
-		 * O cadastro de telefones sera separado
-		 * 
-		 * for(int i = 0; i < usuario.getTelefones().size(); i++) {
-			usuario.getTelefones().get(i).setUsuario(usuario);
-		}*/
+		for(int i = 0; i < entrada.getTelefones().size(); i++) {
+			entrada.getTelefones().get(i).setUsuario(entrada);
+		}
 		
 		// Recupera a senha para salva-la novamente.
 		Optional<Usuario> recuperaSenha = usuarioRepository.findById(entrada.getId());

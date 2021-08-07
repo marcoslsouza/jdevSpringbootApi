@@ -26,4 +26,8 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	
 	@Query("SELECT u FROM Usuario u WHERE u.nome LIKE %?1%")
 	List<Usuario> findUserByName(String nome);
+	
+	@Modifying
+	@Query(value = "INSERT INTO usuarios_role(usuario_id, role_id) VALUES(?1, (SELECT id FROM role WHERE nome_role = 'USER_ROLE'))", nativeQuery = true)
+	void insereAcessoRolePadrao(Long idUser);
 }

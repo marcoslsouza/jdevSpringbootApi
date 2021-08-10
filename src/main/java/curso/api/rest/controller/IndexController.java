@@ -224,11 +224,13 @@ public class IndexController {
 		entrada.setNome(usuarioDTO.getUserNome());
 		entrada.setLogin(usuarioDTO.getUserLogin());
 		entrada.setCpf(usuarioDTO.getUserCpf());
-		entrada.setTelefones(usuarioDTO.getUserTelefones());
+		//entrada.setTelefones(usuarioDTO.getUserTelefones());
 		
-		for(int i = 0; i < entrada.getTelefones().size(); i++) {
-			entrada.getTelefones().get(i).setUsuario(entrada);
+		for(int i = 0; i < usuarioDTO.getUserTelefones().size(); i++) {
+			usuarioDTO.getUserTelefones().get(i).setUsuario(entrada);
 		}
+		
+		entrada.setTelefones(usuarioDTO.getUserTelefones());
 		
 		// Recupera a senha para salva-la novamente.
 		Optional<Usuario> recuperaSenha = usuarioRepository.findById(entrada.getId());
@@ -247,6 +249,7 @@ public class IndexController {
 		saida.setUserNome(usuarioSalvo.getNome());
 		saida.setUserLogin(usuarioSalvo.getLogin());
 		saida.setUserCpf(usuarioSalvo.getCpf());
+		saida.setUserTelefones(usuarioSalvo.getTelefones());
 		
 		return new ResponseEntity<UsuarioDTO>(saida, HttpStatus.OK);
 	}
@@ -271,6 +274,15 @@ public class IndexController {
 		Telefone telefoneSalvo = telefoneRepository.save(telefone);
 		
 		return new ResponseEntity<Telefone>(telefoneSalvo, HttpStatus.OK);
+	}
+	
+	@DeleteMapping(value = "/remover-telefone/{id}", produces = "application/json")
+	public ResponseEntity<?> excluirTelefone(@PathVariable("id") Long id) {
+		
+		return telefoneRepository.findById(id).map(tel -> {
+			telefoneRepository.deleteById(id);
+			return ResponseEntity.ok().build();
+		}).orElse(ResponseEntity.notFound().build());
 	}
 	
 	private String criptografaSenha(Usuario usuario) {

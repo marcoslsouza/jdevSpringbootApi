@@ -83,7 +83,8 @@ public class Usuario implements UserDetails {
 	@Column
 	private String token;
 	
-	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL)
+	// orphanRemoval = true,
+	@OneToMany(mappedBy = "usuario", cascade = { CascadeType.ALL })
 	@EqualsAndHashCode.Exclude
 	private List<Telefone> telefones = new ArrayList<Telefone>();
 	

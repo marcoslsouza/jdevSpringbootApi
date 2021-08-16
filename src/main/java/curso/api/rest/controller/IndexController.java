@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import curso.api.rest.model.Role;
 import curso.api.rest.model.Telefone;
 import curso.api.rest.model.Usuario;
 import curso.api.rest.model.UsuarioDTO;
@@ -92,6 +93,7 @@ public class IndexController {
 			dto.setUserNome(usuario.getNome());
 			dto.setUserCpf(usuario.getCpf());
 			dto.setUserTelefones(usuario.getTelefones());
+
 			usuarios.add(dto);
 		}
 		
@@ -218,30 +220,30 @@ public class IndexController {
 	@PutMapping(value = "/", produces = "application/json")
 	public ResponseEntity<UsuarioDTO> atualizar(@RequestBody @Valid UsuarioDTO usuarioDTO) {
 		
-		// Recebe UsuarioDTO e passa para Usuario
-		Usuario entrada = new Usuario();
-		entrada.setId(usuarioDTO.getId());
-		entrada.setNome(usuarioDTO.getUserNome());
-		entrada.setLogin(usuarioDTO.getUserLogin());
-		entrada.setCpf(usuarioDTO.getUserCpf());
-		//entrada.setTelefones(usuarioDTO.getUserTelefones());
+		Optional<Usuario> usuario = this.usuarioRepository.findById(usuarioDTO.getId());
 		
-		for(int i = 0; i < usuarioDTO.getUserTelefones().size(); i++) {
-			usuarioDTO.getUserTelefones().get(i).setUsuario(entrada);
+		if(usuario.isPresent()) {
+			
+			usuario.get().setNome(usuarioDTO.getUserNome());
+			usuario.get().setLogin(usuarioDTO.getUserLogin());
+			usuario.get().setCpf(usuarioDTO.getUserCpf());
+		
+			for(int i = 0; i < usuarioDTO.getUserTelefones().size(); i++) {
+				usuarioDTO.getUserTelefones().get(i).setUsuario(usuario.get());
+			}
+			usuario.get().setTelefones(usuarioDTO.getUserTelefones());
 		}
 		
-		entrada.setTelefones(usuarioDTO.getUserTelefones());
-		
 		// Recupera a senha para salva-la novamente.
-		Optional<Usuario> recuperaSenha = usuarioRepository.findById(entrada.getId());
+		Optional<Usuario> recuperaSenha = usuarioRepository.findById(usuario.get().getId());
 		String senhaCriptografada = "";
 		if(recuperaSenha.get().getSenha().length() <= 6) {
 			senhaCriptografada = this.criptografaSenha(recuperaSenha.get());
-			entrada.setSenha(senhaCriptografada);
+			usuario.get().setSenha(senhaCriptografada);
 		} else
-			entrada.setSenha(recuperaSenha.get().getSenha());
+			usuario.get().setSenha(recuperaSenha.get().getSenha());
 		
-		Usuario usuarioSalvo = usuarioRepository.save(entrada);
+		Usuario usuarioSalvo = usuarioRepository.save(usuario.get());
 			
 		// Retorna o UsuarioDTO para Usuario
 		UsuarioDTO saida = new UsuarioDTO();
@@ -271,9 +273,9 @@ public class IndexController {
 		telefone.setUsuario(usuario);
 		
 		// Salva o telefone 
-		Telefone telefoneSalvo = telefoneRepository.save(telefone);
+		Telefone telSalvo = telefoneRepository.save(telefone);
 		
-		return new ResponseEntity<Telefone>(telefoneSalvo, HttpStatus.OK);
+		return new ResponseEntity<Telefone>(telSalvo, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "/remover-telefone/{id}", produces = "application/json")

@@ -1,6 +1,7 @@
 package curso.api.rest.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.br.CPF;
@@ -24,6 +25,8 @@ public class UsuarioDTO implements Serializable {
 	@CPF(message = "O CPF é inválido!")
 	private String userCpf;
 	private List<Telefone> userTelefones;
+	
+	private List<Role> roles = new ArrayList<Role>();
 	
 	public UsuarioDTO(Usuario usuario) {
 		this.id = usuario.getId();
